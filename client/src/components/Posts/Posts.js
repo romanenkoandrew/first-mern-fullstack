@@ -7,7 +7,6 @@ import useStyles from './styles';
 const Posts = ({ setCurrentId }) => {
   const classes = useStyles();
   const posts = useSelector((state) => state.postsReducer);
-  console.log(posts);
   return !posts.length ? (
     <CircularProgress />
   ) : (

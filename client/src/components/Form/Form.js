@@ -11,9 +11,8 @@ const Form = ({ currentId, setCurrentId }) => {
   const currentPost = useSelector((state) =>
     currentId ? state.postsReducer.find((el) => el._id === currentId) : null
   );
-  console.log('currentPost', currentPost);
+  const user = JSON.parse(localStorage.getItem('profile'));
   const [postData, setPostData] = useState({
-    creator: '',
     title: '',
     message: '',
     tags: '',
@@ -22,7 +21,6 @@ const Form = ({ currentId, setCurrentId }) => {
   const clearForm = () => {
     setCurrentId(null);
     setPostData({
-      creator: '',
       title: '',
       message: '',
       tags: '',
@@ -32,9 +30,11 @@ const Form = ({ currentId, setCurrentId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (currentId) {
-      await dispatch(updatePost(currentId, postData));
+      await dispatch(
+        updatePost(currentId, { ...postData, name: user?.result?.name })
+      );
     } else {
-      await dispatch(createPost(postData));
+      await dispatch(createPost({ ...postData, name: user?.result?.name }));
     }
     clearForm();
     await dispatch(getPosts());
@@ -44,6 +44,17 @@ const Form = ({ currentId, setCurrentId }) => {
       setPostData(currentPost);
     }
   }, [currentPost]);
+
+  if (!user?.result?.name) {
+    return (
+      <Paper className={classes.paper}>
+        <Typography variant='h6' align='center'>
+          Please Sign in to create posts.
+        </Typography>
+      </Paper>
+    );
+  }
+
   return (
     <Paper className={classes.paper}>
       <form
@@ -55,16 +66,6 @@ const Form = ({ currentId, setCurrentId }) => {
         <Typography variant='h6'>
           {`${currentId ? 'Editing' : 'Creating'}`} a memory
         </Typography>
-        <TextField
-          name='creator'
-          variant='outlined'
-          label='Creator'
-          fullWidth
-          value={postData.creator}
-          onChange={(e) =>
-            setPostData({ ...postData, creator: e.target.value })
-          }
-        />
         <TextField
           name='title'
           variant='outlined'
